@@ -1,6 +1,7 @@
 FROM mongo:8
 WORKDIR /data
 
-ENTRYPOINT ["sh", "-c", "mongod --replSet rs0 --bind_ip 0.0.0.0 --port 27017 --fork --logpath ~/logs --wiredTigerCacheSizeGB 2 && sleep 1 && mongosh --eval 'try {rs.initiate({ _id: `rs0`, members: [{ _id: 0, host: `localhost:27017` }] });} catch {}' && sleep 1 && tail -f /dev/null"]
+COPY init-replica.js /docker-entrypoint-initdb.d/
 
-EXPOSE 27017
+# Let mongod run as PID 1 — no --fork, logs to stdout
+CMD ["mongod", "--replSet", "rs0", "--bind_ip", "0.0.0.0", "--port", "27017"]
